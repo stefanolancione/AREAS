@@ -1,0 +1,962 @@
+STEFANO
+
+Video 3+4:
+	- concetto lookup --> ovvero lista valori agganciato alla tabella SI_LOOKUP (può essere anche agganciato alla classe java o alla list query)
+		- creato nuovo tab per gli studenti
+		- creato lookup da zero sugli studenti (nuovo tab)
+		- gestione dei filtri sul lookup (FIND2)
+		- a differenza della FIND2 sulla FIND3 è possibile selezionare più di un valore (mascherina con più valori)
+	- creazione di un nuovo wizard --> metodo non standard
+		- concetto di connection pool (api connection manager per prendere e rilasciare la connessione)
+		- concetto di service manager (ovvero gestire la classe: ricerca, salvataggio, cancellazione ecc)
+		- funzionamento del psg if tag (ovvero condizione sulla jsp per visualizzare o meno una determinata cosa)
+		- binder --> ovvero una serie di metodi per interfacciarsi con il bean e gestirlo
+			- setPropertyValue
+			- getPropertyValue
+	- sul finale ci sono una serie di metodi di utilità per query, update, insert ecc
+	
+
+RECAP primi due video:
+	AREAS utilizza uno standard MVC al suo interno per riprodurre una serie di pagine std (che sono quasi la sua totalità) cioè a partire da un 			punto di menù funzioni di ricerca o inserire. Premendo sul tasto ricerca si accede alla pagina edit.
+	L'utente interagisce con la view che a sua volta notifica il controller dell'azione dell'utente che a sua volta manipola il modello e il modello 		una volta che interagisce con la base dati aggiorna la vista.
+	In AREAS il modello si realizza creando un Java Bean Pojo (costruttore + get and set) e aggiungiamo una serie di interfacce che servono per la 			persistenza. Il modello e il layer per la persistenza sono strettamente connessi. 
+	Il bean rappresenta un singolo record della tabella.
+	Un modello in AREAS si compone di:
+		Un Pojo
+		XML addizionale dove si associano le proprietà del bean ai campi di db
+		L'implementazione dell'interfaccia Persistent per i metodi di Retrieve, Store e Remove
+		L'implementazione dell'interfaccia ValidableInterface che permette di inserire le logiche di business sul bean
+		Metodo DynamicInfoInterface che tramite GetObjectInfo può descrivere il bean con una serie di info a corredo
+	L'altro modello è la classe di query necessario perché in fase di ricerca bisogna gerstire una serie di filtri
+		Tramite Queryclass si costrutisce la stringa che verrà poi lanciata sul db (estende la classe astratta CustomQueryProfile)
+	Le "views" sono semplici pagine jsp che utilizzano dei customtaglibrary per gestire e modificare la jsp stessa per
+		creare ad esempio i binding tra i campi che mettiamo in maschera nella view e le proprietà che mettiamo sul modello
+		iterate che può fare il ciclo
+		lo stesso tag per creare i binding può essere utilizzato per stampare il vaore di una proprietà anche
+		Le jsp minime che vanno implementate in maniera mandatoria sono la find e edit	
+		Le iterazioni tra client e server è gestito tramite invocazioni specifiche Javascript (doAction ad esempio)
+	Il controller è una semplice classe java il cui compito è quello di occuparsi di tutte le azioni che l'utente può eseguire dalla view
+		Estende la classe astratta W3ControllerPersistent e implementa il metodo init per inizializzarsi in due modi:
+			Dichiarare quali sono le sue view (jsp)
+			Dichiarare qual è la sua classe di query
+		Ogni controller è associato un mapping che è un suo idenfiticativo (che è quello che metteremo nella url). I controller non sono servlet 		esposti verso l'utente, c'è una sola servlet che si chiama ControllerDispatcher (dichiarata all'interno dell'xml della webapp) che 			intercettta tutte le chiamate che terminano per .do e verifica se esistono tra i file dei properties che stanno sotto WEB-INF controller  		e se si lo prende lo istanzia e invoca il metodo init che mostra le view corrispondenti
+
+	Negli esercizi è stato visto:
+		- Come fare una bean di testata
+		- pagina di ricerca, pagina di risultati (insert e edit)
+		- abbiamo aggiunto filtri con classe query
+		- come si fanno le combo
+		- come si aggiunge una colonna a un risultato di ricerca
+		- come si aggiunge e gestisce un flag
+		- come si gestisce la visibilità dei campi e come dinamicamente possiamo gestire la visibilità dei campi in base ad altri
+		- come si crea un bean di dettaglio
+		- come si modifica il bean parent per renderlo consapevole del bean figlio
+		- come si crea la rispettiva jsp di dettaglio
+		- convertito la jsp in griglia
+		- creato una nuova gestione per l'anagrafica degli studenti (che è un bean di testata)
+
+
+Video 2:
+Passaggi per eseguire l'esercizio:
+	1) creare la tabella dettaglio in db;
+	2) creare la rispettiva classe (pojo) in eclipse;
+	3) sulla medesima classe creata, implementare l'interfaccia che serve al framework per la persistenza con i vari metodi (file code snippets)
+	4) sempre nella medesima classe dichiariamo il "memento" (con nome tabella, nome chiave primaria, nome dei campi di controllo);
+	5) implementiamo i metodi store, retrieve e remove
+	6) implementiamo il metodo getObjectInfo (con descrizione della classe creata)
+	7) creiamo l'xml sotto la folder che abbiamo creato per l'esercizio (con descrizione, come name ci mettiamo il path della classe, la tabella e 			la proprietà key "id" cioè la chiave e poi le varie proprietà delle varie col. e per ognuna le sue caratteristiche (FK, lunghezza ecc)
+	8) dentro il bean di dettaglio dobbiamo andare a includere la referenza alla classe (tabella) padre
+		- creare quindi un costruttore che riceve un object generico e ci iniettiamo il bean padre ovvero ci andiamo a definire una proprietà 			transient che vale come riferimento al padre
+		- poinel costruttore la assegno (this.corso = this.parent.getCode())
+	9) adesso bisogna far conoscere alla tabella padre che ha dei figli (cioè corso deve sapere che ha esami sulle classi quindi
+		- sul bean di testata (ovvero corso) definiamo la variabile lista che conterrà in questo caso la lista degli esami (ArrayList)
+		- facciamo i vari getter and setter;
+		- modifichiamo il metodo retrieve andando ad aggiungere una parte di codice dello snipp necessaria per fargli caricare il dettaglio
+			(nello specifico specificare quale sarà la classe figlia (bean esame), il nome della variabile di tipo lista che conterà gli 				esami (o il dettaglio), infine il nome del campo in FK con il padre (ovvero in questocaso ES_CORSO)
+	10) dobbiamo creare una jsp nuova che si occuperà solo di gestire il dettaglio
+		- prendiamo il codice della jsp di dettaglio dallo snipp e lo riportiamo sulla nuova jsp
+		- personalizzare nome e titolo della jsp
+		- aggiungiamo il riferimento al padre (ovvero in questo caso il codice del corso)
+		- nella sezione di dettaglio box inserisco i dettagli dell'esame per le colonne (ovvero descrizione e data esame)
+		- nella sezione di dettaglio result ovvero il risultato da stampare (i dati) --> tag iterate serve per gestire un loop
+		- nella parte finale del jsp mettiamo i campi necessari per eseguire l'inserimento del nuovo record di dettaglio
+
+	11) dobbiamo creare un nuovo controller di dettaglio dedicato per la pagina
+		- nel folder corso creiamo la nuova classe (classeW3 ovvero EsameW3) che estenderà W3 (controller persistent detail) --> prendere dallo 			snipp
+		- specificare i link to parent controller
+		- specificare la jsp di dettaglio
+		- su enableprofile specificare il bean di dettaglio
+
+	12) dobbiamo modificare il controller padre per fargli sapere che ha anche un dettaglio
+		- apriamo il nostro file di properties (che sta sotto web inf controllers) e creiamo le chiavi di legame con il controller di dettaglio
+		- modifichiamo il controller padre per riportare il dettaglio seguendo lo snipp (video da 01.50 in poi)
+
+	13) va utilizzata la sequence per il campo ES_ID ovvero la chiave dell'esame (tab di dettaglio)
+		- dichiarare la seq sul db
+		- aggiungere la seq nella logica del bean Esami ovvero:
+			modificare il metodo store della bean
+
+	14) fare il deploy e testare: ovvero stoppo il servers e faccio girare ANT	
+
+
+Video 1:
+AREAS è scritto in java ed un ERP web e come tutti gli erp ha il compito di fornire tutta una serie di servizi di business di un'azienda.
+E' diviso in quattro aree applicative logiche:
+AMC --> Contabile
+HR --> Risorse umane
+OSP --> Ospedaliero
+TERR --> Territoriale
+Ogni area è divisa in moduli.
+
+Areas utilizza uno standard MVC per disegnare e predisporre ogni pagina.
+Come si crea un modello?
+In AREAS un model è un semplice Java Bean (POJO) che implementa però anche interfacce java per gestire il layer di persistenza ed altre informazioni. Modello e layer di persistenza sono strettamente collegati. Un Bean (ovvero un model) rappresenta un record di una tabella della base dati, ovvero il modello è utilizzato nel caso delle pagine di edit e di insert. 
+Una cosa importante è che AREAS si poggia su un framework completamente proprietario (ovvero non ci sarà Spring o Hybernate ecc ecc), di conseguenza segue delle sue regole.
+Per fare un modulo in AREAS abbiamo bisogno di:
+	Un Pojo bean (cioè getter and setter)
+	un xml addizionale che si pone affianco al bean che ha il compito di fare il mapping di tutti gli attributi delle proprietà del Pojo verso campi e tabella dati
+	Il pojo deve implementare la persistenza per:
+		 caricare il singolo record in base dati
+		 insert o update di un record
+		 eliminare ogni record
+	Deve anche implementare l'interfaccia "validable" (ovvero un solo metodo) che è invocato prima del metodo store che serve per controllare se è tutto ok prima di 		caricare il record in base dati (logiche di validazione)
+	Deve implementare l'interfaccia "Dynamic" che è un metodo necessario per dare l'opportunità al bean di descriversi al suo interno. Esempio il framework chiederà 		al bean di 			dirgli quali sono i campi obbligatori o magari formato e lunghezza campi ecc ecc.			
+
+
+Video 5:
+
+	- Gestione delle utenze: ruolo+ufficio+azienda = terna
+	Primo step:
+		- creare un utenza personale da usare nelle successive esercitazioni
+			1) creare un ufficio --> U_[cognome]
+			2) creare un ruolo --> R_[cognome]
+			3) creare un utente --> [cognome]
+			4) associare due terne all'utente
+		- la classe principale per gestire l' utenza è "ProfileUserBean" (ovvero bean di testata che gestisce l'utente e le sue associazioni con 			ufficio ruolo)
+		- vedere tabelle dal pdf 3 per il db
+	- Profilatura: ovvero la parte autorizzativa
+		- è costituita da chiavi di profilatura (tipo quella che stava sul portale)
+			- parametri (opzioni di configurazione che cambiano o permettono il suo funzionamento e si applica a livello di azienda)
+			- abilitazioni (capacità dell'utente di accedere a determinate funzionalità)
+		Rientrano nella profilatura anche l'abilitazione dei moduli, applicazioni e menù
+			- vedere le tabelle db sul pdf 3
+		Al momento del salvataggio di una chiave viene lanciato il package db "PROFILE_WRITER" (ogni procedura viene invocata dalla maschera di 			profilatura) e la mergedatiUtente fa:
+				- vede quali sono gli utenti associati a quel ruolo
+				- per ogni utente che appartiene a quel ruolo inserisce un record nella tab SI_KEYRAD_DATIUTENTE
+
+Importante --> SHIFT + F12 ti fa vedere i dettagli della maschera per vedere nome controller, classe controller e pagina jsp
+		
+		
+Video 7:
+	REPORT:
+
+	AREAS include il modulo per la gestione della reportistica (report custom secondo le esigenze)
+	Con USERBJBF loggarsi e andare su Avanzate --> Reporting --> Report Personalizzati:
+		- inserisco un nuovo report;
+		- applico un filtro: ovvero inserisco un elemento di tipo filtro aggiungendogli poi gli attributi
+	Il punto di ingresso per la gestione dei report sono "W3ReportPersonalizzatiDin" e "W3ReportPersonalizzatiStat":
+		Uno si basa sui filtri statici l'altro sui filtri dinamici
+	Concetto di entità applicativa:
+		Vengono usate in diversi contesti:
+			Per quanto riguarda i report si può creare una nuova entità applicativa perché il report deve fare una query su un db diverso 				rispetto a quello di AREAS
+			- tabella SR_REPORT --> tabella dei REPORT
+			File system --> indicare il path fisico dove salvare il file raggiungibile dal Tomcat
+			File system dir --> stessa cosa ma con i place holder
+			FTP --> per ftp
+			PLUGIN --> ad esempio serve per spostare eventualmente i file all'interno di un OneDrive di Microsoft
+			Cestino --> serve per pulire eventualmente
+		Classi interessate --> EntitaBean / Entita Storage
+	Concetto di "attach":
+		sono tutti i file gestiti in AREAS (ad esempio un report che viene prodotto dalla procedura, un'estrazione, un file che allega l'utente)
+		e vengono salvati all'interno della base dati:
+			1) SI_ATTACHTIPO --> è l'elenco di tutte le tipologie di file che AREAS è in grado di gestire
+				ad esempio HR_CEDOLINO --> area cedolini o HR_CUD --> Cud
+				Ogni file quindi è associato ad un tipo (ovvero codice e descrizione)
+			2) SI_ATTACHFILE --> tabella di anagrafica del file:
+				ha tre info: il tipo, il nome del file e la sua chiave (necessaria per fare il legame con altre tab di AREAS ad esempio 				MA_MOVMAG legame con MA_MOVTES tramite la chiave). Il campo AT_ID invece fa il legame con SI_ATTACH
+				Nella colonna AT_TIPO si può inserire il filtro AT_TIPO= 'SR_FILTRIREPORTPERS' per vedere i filtri
+			3) SI_ATTACH --> contiene fisicamente il file BLOB e informazioni sul file
+	Desktop Utente --> area in cui l'utente può allegare un file eventualmente
+	Menù Configurazione -> Sistema -> Path Attachment --> serve per vedere tutti i tipi di ATTACH e selezionando un tipo si può fare diverse cose
+		(comprimere o decomprimere, cripta o decripta, entità applicativa --> di salvataggio ovvero se mettiamo un altro db ad esempio salva il 		blob sul db specificato, entità applicativa di storicizzazione --> serve per specificare se spostare i dati da un entità all'altra da 			una certa data in poi)
+	
+	DEMONI:
+
+	L'applicativo non è costituito solo da maschere. Molte delle procedure applicative agiscono in maniera invisibile all'utente. Lavorano in 		background per:
+		Invio di mail
+		Produzione di stampe
+		Avanzamento di processi di Workflow
+		Comunicazioni con sistemi esterni
+	Queste si chiamano webapp DEMONE.
+	La loro creazione viene effettuata in base all'installazione tramite il tool ABFInstaller.
+	La webapp demone è un contenitore su cui potenzialmente potrebbero girarci cose in background. Cosa far girare sulla webapp viene specificato 	sull'applicativo di oggetti "demoni". I moduli JBF/XMPI si occupano del rilascio di:
+		Demone per WORKFLOW (WORKFLOW)
+		Agent Manger (SI_AGENTS)
+		Stampe schedulate (SI_SCHED_REPORT)
+		Demoni di integrazione (SI_HL7, SA_G4GLSAC ecc ecc)
+	I demoni girano sempre ovvero appena parte la webapp girano. Alcuni però vengono eseguiti solo se vengono schedulati per poter essere gestiti in 	determinati momenti della giornata. 
+	SI_AGENT ha il compito di verificare quando è pianificato un AGENT (ovvero delle sub attività che girano).
+	
+	Il file application.properties serve per definire:
+		lo startup delle applicazioni
+		pool connessioni
+		flaggare il tipo di webapp (se utente o demone)
+
+	Per attivare un agent bisogna andare su "Configurazione -> Sistema -> Agent -> Attivazione", cerchiamo l'agent interessato e lo attiviamo 			eventualmente.
+	
+	L'anagrafica del demone è SI_DEMONESERVER. 
+	L'anagrafica della webapp è SI_WEBAPP.
+	L'anagrafica degli agent è SI_AGENTS.
+	L'associazione tra il demone in SI_AGENTS è il tipo (classe) è nella tabella SI_DEMONETIPO.
+
+	L'utente di profilatura, oltre alla questione utente da servizi, deve avere o una sola terna o una delle due deve essere marcata come abituale.
+
+	I batch agents sono agent che servono per fare un operazione one-shot (ovvero una tantum).
+
+	
+Il progetto interessato è JBFReporting.
+		
+Video 7_2:
+
+	DEMONE:
+		Per completare le configurazione del demone è necessario provvedere anche al riavvio di AREAS.
+		Se il demone era già configurato ed abbiamo aggiunto un agent non è necessario il riavvio.
+		Esistono due modi per riavviare:
+			Riavvio della webapp --> sistema più semplice in quanto si può fare tramite Tomcat
+			Riavvio della app server --> occorre collegarsi tramite shell sulla macchina dove gira il Tomcat e lanciare i comandi
+		Sulla tab SI_WEBAPP si può reperire host e url del demone
+		Per consultare le info del demone c'è a disposizione il link "demone/info"
+		Andando sul link ip/manager/html è possibile riavviare il demone (log con admin/admin)
+		Ogni volta che un agent viene eseguito viene scritto nella tabella SI_ESECUZIONI
+		Tramite l'id dell'esecuzione è possibile interrogare SI_ESECUZIONILOG per verificare il rispettivo log
+
+		Per creare un agent bisogna implementare una nuova classe che estende AbstractDaemon e la logica va messa nel metodo "Run" e infine si 			censisce in SI_DEMONETIPO
+
+
+Video 8:
+	
+	MODIFICHE AL DB:
+		Tutto ciò che viene sviluppato deve essere rilasciato sul cliente. In AREAS esistono due modalità per esportare le modifiche al DB
+			1) tramite xml di versione (non ha molto senso perchè il cliente è disallineato con l'xml dello sviluppo)
+				Viene esportata la creazione di una tabella/oggetto sull'xml
+				E' utile solo in caso si preveda il rilascio di nuove versioni Major o minor.
+				L'XML viene creato tramite il Monitor Sviluppatori
+					Tutti gli xml delle modifiche al db (vale per tutti i progetti) vanno a finire dentro il rispettivo path: 
+						pkg padre/repository/modify/ --> ogni versione staccata ha un suo xml (esempio sianc/repository/modify)
+					Per specificare al Monitor Sviluppatori bisogna modificare il file debug.properties (lo stesso file dove è 						censita la base dati)
+				(01.30 fa vedere come funziona la prima modalità per modifiche su tab
+				 01:45 spiega come funziona la modifica sulle classi
+				 da 01.48 spiega come funziona export di tabelle di sistema)
+				 Nel file ConfigTable.ini sono riportate le associazioni tra le regole degli item del modulo con le regole chiave
+				 
+			2) tramite la libreria opensource Liquibase (https://liquibase.org)
+				Viene utilizzata ogni volta che viene rilasciata una correttiva (denominata add)
+				Viene creata una modifica liquibase (changelog)
+				E' più semplice perchè le modifiche vengono eseguite in automatico dalla webapp
+				Liquibase si basa sempre su xml.
+					Le modifiche liquibase sono eseguite nella webapp quindi appena parte  fa anche la verifica 									dell'esecuzione delle modifiche liquibase
+						Ciascun modulo deve censire il proprio changelog master tramite la chiamata al link su pdf 06
+						La chiamata è dentro il "modulo"Initializer all'interno del modulo interessato (esempio 									siancInitializer)
+						Dall'init si verifica il changelog e si accedere all'interno
+						(da 2.30 spiega come funziona)
+						Se faccio una modifica al db e su changelog su sianc blocca solo sianc ma se metti PSGExt o PSGLib 								blocchi tutto perchè tutti i moduli dipendono dal framework
+						(da 2:44 spiega come usare il tag sql di liquibase all'interno del change log)
+						(da 03.15 spiega le tabelle interessate)
+				
+				Tramite il modulo "ControlPanel.do" si può verificare il tab "modifiche da eseguire" per testare le modifiche inserite 					nel db.
+
+
+GIUSEPPE
+
+Appunti importanti su corso JBF
+
+
+FIND2
+
+oltre a modificare il metodo init del controller (es CorsoStudenteW3.java) come indicato nella guida (cioè facendo il filters.put con un nome nostro e una new Date come nell'esempio) 
+---> Bisogna andare anche nella classe Query (es StudenteQuery.java) e andare a modificare il metodo getCustomSqlString() aggiungendo la parte di gestione del filtro passato:
+
+if(isFilterPresent("nomeNostroFiltro")){
+	Object filterValue = getFilterValue("nomeNostroFiltro");
+	
+	sql += AND ST_START_DATE <= " + JDBCDataMapper.objectToSQL(filterValue);
+}
+
+FIND3
+
+X Esercizio 5.4
+
+oltre a seguire le indicazioni per fare una multiselect nella guida, dove andremo a prendere gli studenti, dovremofare anche nel controller (CorsoW3.java) l'override del metodo doConfirmFind che si trova nella classe padre della nostra W3.
+[
+@Override
+protected Object doConfirmFind(HttpServletRequest req) throws Exception {
+	getFindFilter().put("listaStudenti", studentiSelezionati);
+	return super.doConfirmFind(req);
+}
+]
+
+Andremo poi nella classe Query (CorsoQuery.java) a fare il filtro
+[
+if(isFilterPresent("listaStudenti")){
+	List filterValue = (List) getFilterValue("listaStudenti");
+	
+	sql += " AND CR_CODE IN (SELECT CS_CORSO FROM SA_SARD_CORSO_STUDENTE WHERE CS_STUDENTE IN (" + SQLUtils.collection2commaSeparatedString(filterValue) + "))"; //+ JDBCDataMapper.objectToSQL(filterValue);
+}
+]
+
+LookupManager e ResultSetHelper
+
+è utile per interrogare la tabella delle lookup lato codice java.
+ad es 
+
+LookupManager.get.... => prende i valori dalla tabella relativi alla colonna
+
+anche ResultSetHelper è utile per fare query dinamiche (es .fillListList, dove si passa la query e una lista che viene popolata oppure singlerowselect quando abbiamo la certezza che la query torna solo un risultato)
+
+alcuni metodi di utilità sono presenti sul filep df degli snippets
+
+Script Rhino
+
+per far funzionare gli script bisogna che il controller abbia l'istruzione useService = true, altrimenti non funziona (in pratica questa istruzione richiama le operazioni che scatenano gli eventi come ad es ServiceManager.Save).
+Nelle pagine non standard invece fa tutto ServiceManager.save
+
+DANIELE
+
+BACKEND:
+La classe java che rappresenta l'oggetto in tabella (es. Studente) viene definito Bean POJO.
+
+Essa deve implementare le interfacce PSGLibrary.Persistence.Persistent
+									 PSGLibrary.util.ValidableInterface
+									 PSGLibrary.util.DynamicInfoInterface
+									 
+Va poi dichiarato il Memento (PSGLibrary.Persistence.JDBCMemento) che descrive in parte la tabella DB su cui si lavora
+e si mantiene in memoria lo stato del record su DB.
+
+A ogni Bean deve essere associato un file xml (con lo stesso nome della classe e che si trova nello stesso package)
+che fa il mapping delle proprietà con quelle del DB.
+Il contenuto va modificato:
+	SHORT_DESCRIPTION - Una descrizione generica che va a finire in una funzionalità che permette di stampare 
+						(Configurazione/Avanzate/Stampa registro metadati)
+					    un PDF che descrive un oggetto di Areas (un Bean).
+	BEAN_NAME		  - Nome del Bean (es. sianc.corso.Corso)
+	TABLE_NAME		  - Nome tabella
+	KEY_PROPERTY	  	  - Proprietà della classe che rappresenta il campo chiave della tabella 
+				    Poi avremo un tag "Property" per ogni proprietà della classe, al cui interno ci saranno:
+	PROPERTY_NAME 	          - Nome proprietà
+	DB_FIELD		  - Nome campo su DB
+	CAPTION			  - Descrizione colonna
+	JAVA_CLASS		  - Tipo Java (es. java.lang.String)
+	LENGTH			  - Lunghezza sulla base dati (in un campo Data ad esempio che non ha length si mette la lunghezza per fare dd/mm/yyyy quindi 10
+
+
+AGGANCIO JSP - BACKEND:
+Il controller va insieme ai file Bean, con stesso nome, va estesa la classe W3ControllerPersistent. 
+La classe avrà il nome del Bean + W3
+
+Il controller andrà poi aggiunto su jsp/WEB-INF/controllers:
+mapping.nomemapping = pathcontroller
+bean.pathcontroller = nomepackage bean
+
+CLASSE QUERY:
+Va estesa la classe astratta CustomQueryProfile.
+
+Nel costruttore vanno dichiarati i filtri che si vedranno in pagina:
+	formalFilters = "filter1, filter2"			(identificativo del filtro)
+	fieldsName = "field1, field2" 				(nomi campi del DB)
+	fieldsCaption = "caption1,~caption_hidden" 	(intestazione della tabella risultati, la tilde nasconde la colonna)
+	
+Nel metodo getCustomSqlString viene composta la stringa SQL per la query
+si usa JDBCDataMapper.objectToSQL(filterValue) per recuperare il valore del filtro e metterlo in formato SQL
+
+DATABASE:
+Tutte le tabelle hanno i seguenti campi di controllo (che saranno invece assenti nella classe Java):
+
+.._UT_INS - VARCHAR2(30) - Utente che ha inserito il record
+.._DT_INS - DATE 		 - Data inserimento record
+.._UT_VAR - VARCHAR2(30) - Ultimo utente che ha variato il record
+.._DT_VAR - DATE 		 - Data ultima variazione record
+
+MARCO
+
+
+*******************************************************
+come aggiungere una combo a una pagina di ricerca : [ES 1.1]
+*******************************************************
+1) ADEGUARE PAGINA JSP FIND --> snippet combo:
+  	<TR class="<forms:onOff offString="row0" onString="row1"/>">
+		<TD>
+			Stato del Corso
+		</TD>
+		<TD colspan="3">
+			<psg:linkProperty propertyName="statusFilter" isFilter="Y" optionsSourceProperty="corsoStatoOptionsList" optionsSourceShowKey="N" optionBlank="N" >
+				<select> </select>
+				<psg:error/>
+			</psg:linkProperty>
+		</TD>
+										
+	</TR>
+
+2) ADEGUARE CLASSE QUERY DEL BEAN : gestire il nuovo filtro e aggiungere la nuova colonna in output (se richiesto)
+
+   2a] in formalFilters aggiungere il nuovo filtro associato alla combo  
+        
+  public CorsoQuery() {
+    formalFilters = "codeFilter,descriptionFilter,teacherFilter,statusFilter,listaStudenti";
+    fieldsName = "CR_CODE,CR_DESCRIPTION, DECODE(CR_END_DATE, NULL,'Attivo','Disattivo')";
+    fieldsCaption = "Codice,Descrizione,Stato del Corso"; // use tilde to hide a column
+  }
+
+  2b]  in getCustomSqlString() gestire il nuovo filtro :
+
+
+    if(isFilterPresent("statusFilter")) {
+      Object statusFilterValue = getFilterValue("statusFilter");
+
+      if ("A".equals(statusFilterValue)) {
+        sql += " AND CR_END_DATE IS NULL";
+      } else if ("D".equals(statusFilterValue)){
+        sql += " AND CR_END_DATE IS NOT NULL";
+      }
+    }
+
+
+
+3) ADEGUARE CONTROLLER PER AGGIUNTA METODO DI POPOLAMENTO DELLA COMBO : il nome di questo metodo va a determinare poi il valore dell'attributo "optionsSourceProperty" 
+   del customtag linkProperty che racchiude la combo [optionsSourceProperty="corsoStatoOptionsList" ]
+
+  public List getCorsoStatoOptionsList() {
+    //key/description comma separated
+    String options = "T,Tutti,A,Attivi,D,Disattivi";
+    return PSGLibrary.util.ListUtils.createCodeValueList(options);
+  }
+
+
+
+
+*******************************************************
+come aggiungere nuovo campo (prpoeprty) a entità esistente: [ES 1.2]
+*******************************************************
+
+1) modificare DB : aggiungere nuova colonna alla tabella del bean
+
+2) adeguare bean class --> nuova property privata + nuovi metodi getter e setter
+
+       private String remote; // checkbox
+
+3) adeguare XML DESCRIPTOR associato al bean, censendo la nuova property :
+
+      
+      <Property Name="remote" Field="CR_REMOTE" Caption="Identifica se il corso è remoto" Classe="java.lang.String" AutoMapping="true" IsDetail="false">
+         <Info Length="1" Mandatory="0"/>
+      </Property>
+
+4) Adeguare JSP di EDIT del bean --> aggiungere nuovo campo , esempio : 
+
+	<TR class="<forms:onOff offString="row0" onString="row1"/>">
+		<TD>
+			Remoto
+		</TD>
+		<TD colspan="3">
+			<psg:linkProperty propertyName="remote" useBeanInfo="Y">
+				<INPUT TYPE="checkbox" value="S" onchange="doRefresh();">
+				<psg:error />
+			</psg:linkProperty>
+		</TD>
+	</tr>
+
+*****************************************************************************
+come gestire visibilità/obbligatorietà/editabilita campo esistente : [ES 2 e 2.1]
+*****************************************************************************
+
+1) Aggiungere sulla lista delle interfacce della classe bean (POJO)  InteractiveInterface
+
+    public class Corso implements Persistent, ValidableInterface, DynamicInfoInterface, InteractiveInterface {
+
+2) implementare override del nuovo metodo : getPropertyInfo    (con VALUE_LOCKED rendo in campo sola lettura)
+
+  @Override
+  public long getPropertyInfo(String propertyName, int info) {
+
+    // InteractiveInterface.INFO_STATUS : consente di intervenire su obbligatorieta e editabilita di un campo
+    if (InteractiveInterface.INFO_STATUS == info) {
+      if ("code".equals(propertyName)) {
+        return InteractiveInterface.VALUE_REQUIRED;
+      }
+
+      if ("description".equals(propertyName)) {
+        return InteractiveInterface.VALUE_REQUIRED;
+      }
+
+      if ("startDate".equals(propertyName) || "endDate".equals(propertyName)) {
+        return "S".equals(getRemote()) ? InteractiveInterface.VALUE_REQUIRED : 0;
+      }
+    }
+
+    //return 0;
+
+    // fixing per far funzionare il controllo di maxlength sui campi in base alle specifiche dell'XML
+    // descriptor del bean : è necessario nella getPropertyInfo ri-demandare anche alla getObjectInfo
+    Object result = getObjectInfo(DynamicInfoInterface.PROPERTY_INTERACTIVE + "." + info, propertyName);
+
+    if (result instanceof Number) {
+      return ((Number) result).longValue();
+    } else {
+      return 0;
+    }
+
+  }
+
+3) per dare dinamicità al controllo (se serve) nel campo della form che fa da driver alla obbligatorietà variabile 
+   si aggiunge onchange="doRefresh()" 
+
+
+
+
+
+*****************************************************************************
+come gestire campo PK (id) con assegnazione automatica valore al salva : 
+*****************************************************************************
+0) deve essere definita la sequenza in DB (SEQUENCE)
+
+1) nel metodo store del bean , aggiungere il codice per :
+       - settare il valore della property con la sequenza subito prima di salvare
+       - rileggere subito dopo il salva il valore assegnato e assegnarlo alla proprietà corrispondente del bean
+
+  @Override
+  public void Store(PersistenceHandler ph) throws PersistenceException {
+    mem.clear();
+    mem.loadFromBean(this);
+
+    // aggiunto per gestire la sequenza in DB per autogenerazione ID Esame in fase di salvataggio
+    if (id == null) {
+      mem.setProperty("ES_ID", new OracleSequence("SEQ_SA_SARD_ESAME"));
+    }
+
+    ph.Store(mem);
+
+    // aggiunto per gestire la sequenza in DB: dopo il salvataggio mi riallineo il bean con il valore generato
+    // dalla sequenza.
+    id = mem.getPropertyAsLong("ES_ID");
+  }
+
+
+
+*****************************************************************************
+come aggiungere nuovo dettaglio a bean di testata esistente : [ES 3]
+*****************************************************************************
+
+
+1) modificare DB : aggiungere nuova tabella per il bean figlio con colonna FK verso il padre e una propria PK
+
+2) creare bean class per la nuova tabella di dettaglio come quella di testata ma in piu : 
+      - properità transient per il parent
+
+		  //proprieta da aggiungere per i bean di dettaglio (nel caso di master-detail)
+  		  protected transient Corso parent; // proprietà transient che è riferimento al padre
+
+      - definire il costruttore che ha un parametor in input di tipo Object che è il parent
+
+
+ 		 // nuovo costruttore che riceve in input come parametro un Object che sarà il mio parent
+		  // costruttore da aggiungere per i bean di dettaglio (nel caso di master-detail)
+		  public Esame(Object parent) {
+		    this.parent = (Corso) parent;
+ 		   this.corso = this.parent.getCode(); //valorizzo la property di FK verso il padre
+ 		 }
+
+3) creare XML DESCRIPTOR come fratello della classe java del bean.
+
+4) NON VA FATTA LA QUERYCLASS --> E' UN BEAN DI DETAIL NON SERVE!!!!
+
+5) adeguare il bean parent per :
+     --  aggiungere lista dei figli : nuova proprietà di tipo lista + metodi getter e setter
+ 		 //GESTIONE DETTAGLI : ESAMI
+ 		 private List<Esame> esami = new ArrayList<>();
+
+     -- adeguamento metodo retrieve per recuperare come ultima cosa la lista dei dettagli da DB : 
+
+
+ 	   //GESTIONE DETTAGLI : ESAMI - recuperando un corso recupero da db anche la lista di dettagli esami.
+	    // primo parametro : classname del tipo di dettaglio
+	    // penultimo parametro : property del bean padre da popolare con i dettagli recuperati (lista dettagli)
+	    // ultimo parametro : passare alla getReferenceForeignKey la stringa con il nome della colonna, nella tabella DETTAGLIO, che
+ 	   //                    contiene la FK verso il padre. in questo caso ES_CORSO di SA_SARD_ESAME
+ 	   ph.getPersistenceManager().Find(Esame.class.getName(), new Class[]{Object.class}, new Object[]{this}, esami, mem.getReferenceForeignKey("ES_CORSO"));
+
+6) CREARE UNA NUOVA JSP CHE CONTERRA' IL LAYOUT DEL NUOVO TAB NELLA ANAGRAFICA DEL BEAN PADRE : 
+     nome pagina : beanFiglioDetail.jsp (es:  esameDetail.jsp) 
+
+     -- per il dettaglio c'è uno snippet dedicato.
+
+7) CREARE NUOVO CONTROLLER PER IL DETTAGLIO  : estende W3ControllerPersistentDetail
+    [VEDI CODE SNIPPETS]
+      -  linkToParentDetails(“esami”);  nome della proprietà del padre che contiene i dettagli; 
+      -  setStatus(STATUS_INSERT);  per i dettagli NON HA MAI SENSO METTERE COME DEFAULT = STATUS_FIND
+
+8) dichiarare il mapping del nuovo bean e controller di dettaglio nel file properties (WEB-INF\controllers\sianc.properties): 
+
+9) modificare il controller padre per introdurre la gestione dei tab e le relative ControllerForward per passare 
+   la palla all'altro controller in caso di click dell'utente sui tab di dettaglio: codice da mettere alla fine dell metodo init
+
+    // **** GESTIONE TAB NEL CASO DI PRESENZA DETTAGLI *****
+    // Init the tabs : main + dettagli (esami e studenti)
+    Tab tab = getTabsList().addTab("TAB_CORSO", "Corso");
+    tab.setAction(ACTION_TAB);
+
+    tab = getTabsList().addTab("TAB_ESAMI", "Esami");
+    tab.setAction(ACTION_TAB);
+
+    tab.setExecutor(new ButtonExecutorInterface() {
+      public Object execute(ControllerInterface controller, ButtonInterface button, HttpServletRequest req, String action)
+          throws ButtonExecutorException {
+        // adeguare con il mapping del controller di dettaglio e con l'istanza del controller padre
+        return new ControllerForward(req, "/sisar.esame.do?ACTION=INSERT", CorsoW3.this);
+      }
+    });
+
+
+
+***********************************************************************************************
+come rendere griglia bean di dettaglio editabile (se ci sono pochi campi va bene) : [ES 3.1]
+***********************************************************************************************
+
+1) creare la JSP ad-hoc che gestisce la modalità inserimento dettagli "in griglia" [vedi code snippets]
+   - di solito si da il nome : <beandetail>DetailGrid.jsp --> esameDetailGrid.jsp
+
+
+2) nel controller del bean di dettaglio devo modificare due cose : 
+     - nel metodo init: Impostare il controller nella modalità specifica STATUS_GRID
+     - mettere l'url della nuova JSP fatta al passo precedente per STATUS_GRID
+     - setStatus(STATUS_GRID);
+
+    // UNICA MODIFICA NECESSRIA PER PASSARE DA INSERIMENTO DETTAGLIO STANDARD A MODALITA IN GRIGLIA
+    // puntare alla nuova pagina corsoDetailGrid.jsp
+    // Init the Views  :STATUS_GRID E' PER LA VISUALIZZAZIONE IN MODALITA GRIGLIA MODIFICABILE!!!!
+    setReturnPage(ControllerStatusInterface.STATUS_GRID, "/sianc/sisar/corso/esameDetailGrid.jsp");
+    setReturnPage(ControllerStatusInterface.STATUS_INSERT, STATUS_GRID);
+    setReturnPage(ControllerStatusInterface.STATUS_VIEW, STATUS_GRID);
+    setStatus(STATUS_GRID);
+    setLastPageForward(getReturnPage(getStatus()));
+
+
+
+***********************************************************************************************
+come definire un lookup : [ES 5]
+***********************************************************************************************
+
+1) aggiungere colonna al bean interessato, se necessario , con FK verso 
+   la tabella i cui valori poi saranno selezionabili da lookup
+
+2) se non esiste già in SI_LOOKUP, va censito il nuovo lookup che andremo a utilizzare 
+   altrimenti si ricicla quello esistente e non serve fare il censimento
+
+
+        -- CENSIMENTO LOOKUP SU STUDENTI
+        INSERT
+        INTO SI_LOOKUP
+        (
+            LK_CODICE,
+            LK_TITLE,
+            LK_TABLENAME,
+            LK_KEYFIELDS,
+            LK_LOOKUPFIELDS,
+            LK_LISTFIELDS,
+            LK_CAPTIONFIELDS,
+            LK_UT_INS,
+            LK_DT_INS
+        )
+        VALUES
+        (
+            'SA_SARD_STUDENTE_LK',
+            'Lista degli studenti', -- sara il titolo della popup lista valori
+            'SA_SARD_STUDENTE',
+            'ST_ID', -- pk della tabella indicata sopra
+            'ST_NAME,ST_SURNAME',
+            'ST_ID,ST_NAME,ST_SURNAME,ST_START_DATE', -- 'PK,FIELD1,FIELD2'
+            'Matricola,Nome,Cognome,Iscritto dal',
+            'BTU',
+            SYSDATE
+        );
+
+        commit;
+
+
+3) Nel bean di interesse : aggiungere nuova property di tipo corrispondente alla fk + getter e setter
+
+4) XML DESCRIPTOR: adeguarlo aggiungendo il nuovo nodo property per la nuova proprietà (FK verso tabella puntata da lookup)
+
+5) Nel bean di interesse Devo modificare la getObjectInfo nel bean per indicare il lookup 
+   da utilizzare per la nuova property aggiunta al bean (in questo caso cittadinanza)  : DynamicInfoInterface.PROPERTY_LOOKUP
+
+  @Override
+  public Object getObjectInfo(String info, String propertyName) {
+
+    //ES 5 : introduzione LOOKUP con FK verso SA_CITTADINANZA
+    //       collego la proprieta cittadinanza alla lookup censita con codice SA_CITTADINANZA in SI_LOOKUP
+    if (DynamicInfoInterface.PROPERTY_LOOKUP.equals(info)) {
+      if ("cittadinanza".equals(propertyName)) {
+        return "SA_CITTADINANZA"; //LK_CODICE di SI_LOOKUP
+      }
+    }
+
+    if (infoDelegate == null) {
+      infoDelegate = DynamicInfoUtils.getBeanDynamicInfo(Studente.class);
+    }
+
+    return infoDelegate.getObjectInfo(info, propertyName);
+  }
+
+6) Aggiugnere il widget LOOKUP nella maschera di edit del bean di interesse : 
+
+        <psg:linkProperty propertyName="cittadinanza" useBeanInfo="Y">
+           <input type="hidden">
+        </psg:linkProperty>
+        <psg:lookupProperty propertyNames="cittadinanza" lookupCodeField="CT_CODI" useBeanInfo="Y">
+           <input type="text" name="codice">
+        </psg:lookupProperty>
+        <psg:lookupProperty propertyNames="cittadinanza" lookupField="CT_DESC" useBeanInfo="Y">
+           <input type="text" name="descrizione">
+        </psg:lookupProperty>
+        <psg:lookupProperty propertyNames="cittadinanza" >
+           <input type="button" class="btn" value="...">
+        </psg:lookupProperty>
+
+
+
+****************************************************************************************************************
+come mostrare in una griglia la concatenazione di info prese da una tabella puntata tramite lookup property
+****************************************************************************************************************
+
+1)  usare il tag lookupProperty del widget lookup ma in modalità "empty element" --> cosi stampa.
+
+		<td>
+			<psg:lookupProperty propertyNames="studente" lookupField="ST_NAME" source="item" useBeanInfo="Y" />&nbsp;
+			<psg:lookupProperty propertyNames="studente" lookupField="ST_SURNAME" source="item" useBeanInfo="Y" />
+		</td>
+
+
+
+***********************************************************************************************
+come passare filtri a  una lookup : [ES 5.2]
+***********************************************************************************************
+
+1 ) modificare opportunamente il metodo getObjectInfo del bean relativo alla pagina in cui 
+    devo aggiungere la nuova lookup, in modo da passare la mappa dei filtri da applicare 
+    alla popup della lista valori che si aprira dal widget lookup: 
+
+    @Override
+    public Object getObjectInfo(String info, String propertyName) {
+       if(DynamicInfoInterface.PROPERTY_LOOKUP.equals(info)) {
+          if("studente".equals(propertyName)) {
+             return “SA_SARD_STUDENTE_LK”;
+          }       
+       }
+
+       // GESTIONE PASSAGGIO FILTRI AGGIUNTIVI ALLA POPUP LISTAVALORI LOOKUP
+       if(DynamicInfoInterface.PROPERTY_LOOKUP_FILTERS.equals(info)) {
+          if("studente".equals(propertyName)) {
+             Map<String, Object> filters = new HashMap<String, Object>();
+             filters.put(LookupManager.DATE_ENABLE_FILTER, new Date());
+             //altri esempi
+             //filters.put("ST_NAME", "Giuseppe"); // fa una uguaglianza secca
+
+             //filters.put("TO_CHAR(ST_START_DATE,’yyyy’)", "2022"); // fa una uguaglianza secca torna iscritti nel 2022
+
+             return filters;
+          }
+       }
+
+
+
+
+***********************************************************************************************
+come modificare la definizione di una lookup per gestire date periodo di validita 
+***********************************************************************************************
+
+
+-- ESERCIZIO 5.1 : modifica della definizione della lookup studente
+--                 per specificare i campi di inizio e fine validita dei record studente
+UPDATE SI_LOOKUP SET 
+LK_DATEENABLE='ST_START_DATE' , 
+LK_DATEDISABLE='ST_END_DATE'
+WHERE LK_CODICE = 'SA_SARD_STUDENTE_LK';
+
+
+
+***********************************************************************************************
+come passare da una lookup standard a una FIND2 : [ES 5.3]
+***********************************************************************************************
+
+1) modificare la pagina JSP dove c'e' la lookup -> dove sta il bottone di apertura della lista valori
+   devo andare nella lookupProperty che racchiude il bottoncino di apertura del widget lookup: qui indico 
+   nella proprietà linkedController="controller.mapping" referenzio qui il controller collegato alla 
+   maschera di ricerca che voglio far aprire al click sul bottone di apertura popup lista valori
+
+        <psg:lookupProperty propertyNames="studente" linkedController="sisar.studente">
+           <input type="button" class="btn" value="...">
+        </psg:lookupProperty>
+
+2) adeguare il controller associato alla pagina in cui c'è la FIND2, definendo un actionHandler opportuno
+   per passare i filtri alla pagina aperta come popup dalla find2. Frammento da mettere alla fine del
+   metodo init() del controller che contiene la FIND2: 
+
+
+        Find2ActionHandler find2Handler = (Find2ActionHandler)actionBinder.getActionHandlers().get(ACTION_FIND2);
+
+        find2Handler.setFilterDecorator(new ControllerForwardDecoratorInterface() {
+           public void beforeControllerForward(String controllerForward,
+                                               ControllerContext context, 
+                                               HttpServletRequest req, String options, Map originalReqParams) {
+              if("sisar.studente".equals(controllerForward)) {
+                 Map filters = new HashMap();
+                 filters.put("soloIscritti", new Date()); //devo far riferimnento ai filtri previsti dalla form di ricerca su cui sto dirottando la popup della lista valori con la find2. Questo filtro arriva alla classe StudenteQuery!!! Qui lo devo gestire!!!
+                 context.set(CONTEXT_FIND_FILTERS, filters); // aggiunge il filtro al contesto
+              }
+           }
+        });
+
+3) adeguare la queryClass del bean "puntato" dalla FIND2 per gestire all'interno del metodo getCustomSqlString
+   il nuvioo filtro iniettato dal controller tramite l'actionhandler del controller della pagina in cui ho messo la FIND2
+   che genera la mappa deifiltri e la setta sul contesto --> CONTEXT_FIND_FILTERS
+   
+
+        //filtro aggiunto per gestione FIND2 su studente aperta da form associazione corso-studente
+        if (isFilterPresent("soloIscritti")) {
+          Object filterValue = getFilterValue("soloIscritti");
+          sql += " AND ST_START_DATE <= " + JDBCDataMapper.objectToSQL(filterValue);
+          sql += " AND NVL(ST_END_DATE,SYSDATE) >= " + JDBCDataMapper.objectToSQL(filterValue);
+        }
+
+   
+
+
+***********************************************************************************************
+come passare a una FIND3 : [ES 5.4] (rispetto a FIND2 consente la selezione multipla)
+***********************************************************************************************
+
+1) nella pagina in cui devo aggiungere FIND3 , aggiungere il nuovo customtag dedicato  :
+      - propertyName       : dove voglio ricevere la lista degli elementi che sono stati selezionati [property sul controller]
+      - source             : indico dove andrà a prendere la propertyName (controller)
+      - lookupName         : nome della lookup associata , cosi come censita in SI_LOOKUP
+      - controllerForward  : va messo slash all’inizio e anche il ".do" alla fine ci va indicato il mapping del controller "referenziato" in questo caso quello degli studenti
+      - lookupField        : campo da mostrare nel widget che visualizza gli N elementi selezionati in popup 
+
+        <forms:find3 propertyName="studentiSelezionati" source="controller" lookupName="SA_SARD_STUDENTE_LK" controllerForward="/sisar.studente.do" lookupField="ST_SURNAME">
+           <SELECT MULTIPLE size="10" STYLE="width:200px">
+           </SELECT>
+        </forms:find3>
+
+2) nel controller associato alla pagina in cui introduco la FIND3 : 
+     2a]- nuova property di tipo lista che riceve gli N eleemnti selezionati nella popup della FIND3 + metodi getter e setter
+
+           private List<Object> studentiSelezionati = new ArrayList<Object>();
+
+    2b]- override di doConfirmFind per passare alla queryCalss e gestire il filtro contenuto nella 
+         nuova proprieta sul controller che contiene gli elementi selezionati nella FIND3 (vedi punto precedente 2a):
+
+          //gestione FIND3: override di doConfirmFind necessario per passare il filtro con la lista degli
+          //studenti selezionati nel widget find3, dalla pagina di ricerca del corso alla classe di query per poter applicare il filtro
+          @Override
+          protected Object doConfirmFind(HttpServletRequest req) throws Exception {
+             if (studentiSelezionati != null && studentiSelezionati.size()>0) {
+              getFindFilter().put("listaStudenti", studentiSelezionati);
+            } else {
+              getFindFilter().remove("listaStudenti");
+            }
+
+             return super.doConfirmFind(req);
+          }
+
+
+3) nella classe query del bean la cui ricerca deve tenere conto del nuovo filtro basato su N elementi selezionati nella FIND3 : 
+   va aggiunta la gestione del nuovo possibile filtro cosi come iniettato dal controller nell'override di doConfirmFind.
+    - aggiungere il frammento per gestire il nuovo filtro 
+
+        // SUPPORTO FIND3 IN RICERCA CORSO : filtro listaStudenti
+        if (isFilterPresent("listaStudenti")) {
+          List filterValue = (List)getFilterValue("listaStudenti");
+
+          sql += " AND CR_CODE IN (SELECT CS_CORSO FROM SA_SARD_CORSO_STUDENTE WHERE CS_STUDENTE IN (" +  SQLUtils.collection2commaSeparatedString(filterValue) + "))";
+        }
+
+
+
+
+***********************************************************************************************
+come fare una nuova pagina "non standard" (es wizard) : [ES 6]
+***********************************************************************************************
+
+1) definire un nuovo controller che estende W3ControllerPersistent : 
+    -  properties private + getter e setter, una per ciascun campo nella form wizard
+    -  metodo init : alla fine del metodo setta la pagina jsp del wizard  --> setLastPageForward("/sianc/sisar/wizard/wizard.jsp");
+
+
+      @Override
+      public void init(HttpServletRequest req) throws Exception {
+        super.init(req);
+
+        setLastPageForward("/sianc/sisar/wizard/wizard.jsp");
+      }
+    
+
+
+
+    -   GESTIRE UNA ACTION "CUSTOM" : fare override di doAction() --> in base al nome della action posso chiamare un metodo di appoggio dedicato 
+
+@Override
+protected Object doAction(String action, HttpServletRequest req) throws Exception {
+   if("MY_ACTION".equals(action)) {
+      return doSomething(req);
+   }
+   
+   return super.doAction(action, req);
+}
+
+protected Object doSomething(HttpServletRequest req) throws Exception {
+   setDataProperties(req, null); //to set into your properties the data in your request
+   // I create a service context
+   ServiceContext serviceContext = new ServiceContext(user);
+   Connection connection = null;
+   try {
+      // I take a DB connection
+      connection = ConnectionManager.getConnection(user, 1000);
+      serviceContext.setConnection(connection);
+      // I create a new Object: pass null as second parameter (passing a value retrieves an existing entity from DB this the ID = to the value passed as second parameter. (see below) 
+      BinderInterface newBinder = ServiceManager.getObject(MyBean.class.getName(),null, serviceContext);
+      // I set the properties into the binder
+      newBinder.setPropertyValue("property1", "value", serviceContext);
+      newBinder.setPropertyValue("property2", "value", serviceContext);
+      // I save the new binder
+      ServiceManager.save(newBinder, serviceContext);
+      // I read the properties from the binder
+      Object id = newBinder.getPropertyValue("id");
+      // I read a binder by ID
+      BinderInterface binder = ServiceManager.getObject(MyBean.class.getName(), id, serviceContext);
+      connection.commit();
+   } catch(Exception e) {
+      addError("GLOBAL", "Something was wrong!");
+   } finally {
+      /* I always release the DB connection, no matter the result.
+      * The release also do the rollback of the connection.
+      * NEVER close the connection!
+      */
+      ConnectionManager.releaseConnection(connection);
+   }
+}
+
+
+  
+
+2) definire nuova pagina JSP wizard partendo da una pagina find, togliendo alla fine le due inclusioni : 
+    - <%@ include file="/PSGLibrary/w3StatusButtons.jsp"%>
+    - <%@ include file="/PSGLibrary/findResult.jsp"%>
+
+    - i campi nella pagina wizard, nel linkProperty avranno source="controller" (le properties sono in binding sul controller dedicato).
+        non mettere ne isFilter ne useBeanInfo
+   
+    - in fondo dopo i campi : un bottone che ha onclick="doAction('CREA_CORSO')"  <-- nome della action custom che andrà gestita nel controller.
+
+
+3) mapping nel file application.properties [sianc.properties] sotto \WEB-INF\controllers
+    - aggiungere solo una riga: in questo caos c'è solo il legame tra il mapping e ilcontroller : NON C'E' UN BEAN!!!
+
