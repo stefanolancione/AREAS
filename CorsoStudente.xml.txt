@@ -1,0 +1,23 @@
+&lt;?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?&gt;
+&lt;Bean Description="Studenti che frequentano un corso" Name="sianc.sisar.corso.CorsoStudente" TableName="SA_SARD_CORSO_STUDENTE"&gt;
+    &lt;Keys&gt;
+        &lt;Key Name="id" /&gt;
+    &lt;/Keys&gt;
+    &lt;Properties&gt;
+        &lt;Property Name="id" Field="CS_ID" Caption="Identificativo" Classe="java.lang.Long" AutoMapping="true" IsDetail="false"&gt;
+            &lt;Info Length="11" Mandatory="0" /&gt;
+        &lt;/Property&gt;
+
+        &lt;Property Name="corso" Field="CS_CORSO" Caption="Codice del corso" Classe="java.lang.String" AutoMapping="true" IsDetail="false"&gt;
+            &lt;Info Length="11" Mandatory="0" /&gt;
+        &lt;/Property&gt;
+
+        &lt;Property Name="studente" Field="CS_STUDENTE" Caption="Identificativo studente" Classe="java.lang.Long" AutoMapping="true" IsDetail="false"&gt;
+            &lt;Info Length="11" Mandatory="0" /&gt;
+        &lt;/Property&gt;
+
+        &lt;Property Name="voto" Field="CS_MARK" Caption="Voto dello studente" Classe="java.lang.Long" AutoMapping="true" IsDetail="false"&gt;
+            &lt;Info Length="11" Mandatory="0" /&gt;
+        &lt;/Property&gt;
+    &lt;/Properties&gt;
+&lt;/Bean&gt;

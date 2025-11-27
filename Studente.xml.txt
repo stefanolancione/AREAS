@@ -1,0 +1,31 @@
+&lt;?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?&gt;
+&lt;Bean Description="Anagrafica studente" Name="sianc.sisar.studente.Studente" TableName="SA_SARD_STUDENTE"&gt;
+    &lt;Keys&gt;
+        &lt;Key Name="id" /&gt;
+    &lt;/Keys&gt;
+    &lt;Properties&gt;
+        &lt;Property Name="id" Field="ST_ID" Caption="Identificativo dello studente" Classe="java.lang.Long" AutoMapping="true" IsDetail="false"&gt;
+            &lt;Info Length="11" Mandatory="0" /&gt;
+        &lt;/Property&gt;
+
+        &lt;Property Name="name" Field="ST_NAME" Caption="Nome dello studente" Classe="java.lang.String" AutoMapping="true" IsDetail="false"&gt;
+            &lt;Info Length="256" Mandatory="0" /&gt;
+        &lt;/Property&gt;
+
+        &lt;Property Name="surname" Field="ST_SURNAME" Caption="Cognome dello studente" Classe="java.lang.String" AutoMapping="true" IsDetail="false"&gt;
+            &lt;Info Length="256" Mandatory="0" /&gt;
+        &lt;/Property&gt;
+
+        &lt;Property Name="startDate" Field="ST_START_DATE" Caption="Data inizio iscrizione" Classe="java.util.Date" AutoMapping="true" IsDetail="false"&gt;
+            &lt;Info Length="10" Mandatory="0" /&gt;
+        &lt;/Property&gt;
+
+        &lt;Property Name="endDate" Field="ST_END_DATE" Caption="Data fine iscrizione" Classe="java.util.Date" AutoMapping="true" IsDetail="false"&gt;
+            &lt;Info Length="10" Mandatory="0" /&gt;
+        &lt;/Property&gt;
+
+        &lt;Property Name="cittadinanza" Field="ST_CITTADINANZA" Caption="Cittadinanza studente" Classe="java.lang.String" AutoMapping="true" IsDetail="false"&gt;
+            &lt;Info Length="11" Mandatory="0" /&gt;
+        &lt;/Property&gt;
+    &lt;/Properties&gt;
+&lt;/Bean&gt;

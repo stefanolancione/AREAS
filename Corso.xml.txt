@@ -1,0 +1,31 @@
+&lt;?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?&gt;
+&lt;Bean Description="Bean per gestire un corso scolastico" Name="sianc.sisar.corso.Corso" TableName="SA_SARD_CORSO"&gt;
+    &lt;Keys&gt;
+        &lt;Key Name="code" /&gt;
+    &lt;/Keys&gt;
+    &lt;Properties&gt;
+        &lt;Property Name="code" Field="CR_CODE" Caption="Codice del corso" Classe="java.lang.String" AutoMapping="true" IsDetail="false"&gt;
+            &lt;Info Length="11" Mandatory="0" /&gt;
+        &lt;/Property&gt;
+
+        &lt;Property Name="description" Field="CR_DESCRIPTION" Caption="desc del corso" Classe="java.lang.String" AutoMapping="true" IsDetail="false"&gt;
+            &lt;Info Length="256" Mandatory="0" /&gt;
+        &lt;/Property&gt;
+
+        &lt;Property Name="teacher" Field="CR_TEACHER" Caption="insegnante del corso" Classe="java.lang.String" AutoMapping="true" IsDetail="false"&gt;
+            &lt;Info Length="128" Mandatory="0" /&gt;
+        &lt;/Property&gt;
+
+        &lt;Property Name="startDate" Field="CR_START_DATE" Caption="data inizio del corso" Classe="java.util.Date" AutoMapping="true" IsDetail="false"&gt;
+            &lt;Info Length="10" Mandatory="0" /&gt;
+        &lt;/Property&gt;
+
+        &lt;Property Name="endDate" Field="CR_END_DATE" Caption="data fine del corso" Classe="java.util.Date" AutoMapping="true" IsDetail="false"&gt;
+            &lt;Info Length="10" Mandatory="0" /&gt;
+        &lt;/Property&gt;
+
+        &lt;Property Name="remote" Field="CR_REMOTE" Caption="identifica se il corso remoto" Classe="java.lang.String" AutoMapping="true" IsDetail="false"&gt;
+            &lt;Info Length="1" Mandatory="0" /&gt;
+        &lt;/Property&gt;
+    &lt;/Properties&gt;
+&lt;/Bean&gt;

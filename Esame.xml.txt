@@ -1,0 +1,27 @@
+&lt;?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?&gt;
+&lt;Bean Description="Esame corso" Name="sianc.sisar.corso.Esame" TableName="SA_SARD_ESAME"&gt;
+    &lt;Keys&gt;
+        &lt;Key Name="id" /&gt;
+    &lt;/Keys&gt;
+    &lt;Properties&gt;
+        &lt;Property Name="id" Field="ES_ID" Caption="Id dell'esame" Classe="java.lang.Long" AutoMapping="true" IsDetail="false"&gt;
+            &lt;Info Length="11" Mandatory="0" /&gt;
+        &lt;/Property&gt;
+
+        &lt;Property Name="corso" Field="ES_CORSO" Caption="codice corso" Classe="java.lang.String" AutoMapping="true" IsDetail="false"&gt;
+            &lt;Info Length="11" Mandatory="0" /&gt;
+        &lt;/Property&gt;
+
+        &lt;Property Name="description" Field="ES_DESCRIPTION" Caption="descr esame" Classe="java.lang.String" AutoMapping="true" IsDetail="false"&gt;
+            &lt;Info Length="256" Mandatory="0" /&gt;
+        &lt;/Property&gt;
+
+        &lt;Property Name="date" Field="ES_DATE" Caption="data esame" Classe="java.util.Date" AutoMapping="true" IsDetail="false"&gt;
+            &lt;Info Length="10" Mandatory="0" /&gt;
+        &lt;/Property&gt;
+
+        &lt;Property Name="maxStudent" Field="ES_MAX_STUDENT" Caption="numero massimo studenti" Classe="java.lang.Integer" AutoMapping="true" IsDetail="false"&gt;
+            &lt;Info Length="3" Mandatory="0" /&gt;
+        &lt;/Property&gt;
+    &lt;/Properties&gt;
+&lt;/Bean&gt;
